@@ -1,7 +1,7 @@
 # handlers/auth_handlers.py
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import CallbackContext
-from handlers.check_handlers import checkin, checkout
+from handlers.check_handlers import checkin, checkout, request_location
 from handlers.report_handlers import non_custom_report, handle_custom_dates
 from helpers import get_user_token
 from helpers import TIME_FRAME_OPTIONS, calculate_date_range
@@ -73,10 +73,12 @@ async def handle_message(update: Update, context: CallbackContext):
             context.user_data['auth_stage'] = 'login'
 
     if user_input == "Check In":
-        await checkin(update, context)
+        context.user_data['last_action']='check_in'
+        await request_location(update)
 
     elif user_input == "Check Out":
-        await checkout(update, context)
+        context.user_data['last_action']='check_out'
+        await request_location(update)
 
     elif user_input == "Generate Report":
         context.user_data['stage'] = 'report'
@@ -150,3 +152,30 @@ async def handle_message(update: Update, context: CallbackContext):
             resize_keyboard=True
         )
         await handle_custom_dates(update, context, reply_markup)
+
+
+async def handle_location(update: Update, context: CallbackContext):
+    role = context.user_data.get('role')
+    last_action = context.user_data.get('last_action')
+    if role == 'admin':
+        keyboard = [
+        ["Check In", "Check Out"],
+        ["Generate Report"],
+        ["Leave Account"]
+            ]
+    else:
+        keyboard = [
+        ["Check In", "Check Out"],
+        ["Leave Account"]
+    ]
+    reply_markup = ReplyKeyboardMarkup(
+        keyboard, 
+        one_time_keyboard=True, 
+        resize_keyboard=True
+    )
+    if last_action == 'check_in':
+        await checkin(update, context, reply_markup)
+    elif last_action == 'check_out':
+        await checkout(update, context, reply_markup)
+    else:
+        await update.message.reply_text("Please specify whether you want to check in or check out first.")
