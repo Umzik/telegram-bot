@@ -43,13 +43,13 @@ async def handle_message(update: Update, context: CallbackContext):
         login = context.user_data.get('login')
         password = update.message.text
         try:
-            token, role_response, name, surname = get_user_token(login, password)
+            token_response, role_response, name, surname = get_user_token(login, password)
         except:
             await update.message.reply_text(
                 "Incorrect credentials. To start again, press /start")
 
-        if token:
-            context.user_data['token'] = token
+        if token_response:
+            context.user_data['token'] = token_response
             context.user_data['role'] = role_response
             context.user_data['auth_stage'] = 'completed'
             context.user_data['status']='base'
