@@ -33,7 +33,7 @@ def calculate_date_range(option):
         return None, None
 
 def get_user_token(login, password):
-    response = requests.post(f"{BACKEND_URL}/login/", json={"login": login, "password": password})
+    response = requests.post(f"{BACKEND_URL}/login/", json={"login": login, "password": password}, verify=False)
     if response.status_code == 200:
         return response.json().get('access'), response.json().get('role'), response.json().get('role'), response.json().get('role')
     return None

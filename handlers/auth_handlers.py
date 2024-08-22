@@ -42,7 +42,7 @@ async def handle_message(update: Update, context: CallbackContext):
     elif auth_stage == 'password':
         login = context.user_data.get('login')
         password = update.message.text
-        token, role_response, name, surname = get_user_token(login, password)
+        token, role_response = get_user_token(login, password)
         if token:
             context.user_data['token'] = token
             context.user_data['role'] = role_response
