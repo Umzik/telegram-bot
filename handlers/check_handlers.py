@@ -5,15 +5,15 @@ import requests
 from config import BACKEND_URL
 
 async def request_location(update: Update):
-    location_button = KeyboardButton(text="Share Location", request_location=True)
+    location_button = KeyboardButton(text="Поделиться местоположением", request_location=True)
     reply_markup = ReplyKeyboardMarkup([[location_button]], one_time_keyboard=True)
     
-    await update.message.reply_text("Please share your location for check-in/check-out.", reply_markup=reply_markup)
+    await update.message.reply_text("Пожалуйста, укажите свое местоположение для регистрации прихода/ухода.", reply_markup=reply_markup)
 
 async def checkin(update: Update, context: CallbackContext, reply_markup):
     token = context.user_data.get('token')
     if not token:
-        await update.message.reply_text("You need to authenticate first. Please start again.")
+        await update.message.reply_text("Сначала вам необходимо пройти аутентификацию. Пожалуйста, начните снова.", reply_markup=ReplyKeyboardMarkup([["Авторизация"]], one_time_keyboard=True, resize_keyboard=True))
         return
     
     context.user_data['last_action'] = 'checkin'
@@ -34,7 +34,7 @@ async def checkin(update: Update, context: CallbackContext, reply_markup):
 async def checkout(update: Update, context: CallbackContext, reply_markup):
     token = context.user_data.get('token')
     if not token:
-        await update.message.reply_text("You need to authenticate first. Please start again.")
+        await update.message.reply_text("Сначала вам необходимо пройти аутентификацию. Пожалуйста, начните снова.", reply_markup=ReplyKeyboardMarkup([["Авторизация"]], one_time_keyboard=True, resize_keyboard=True))
         return
 
     # Check if the message contains location data

@@ -1,3 +1,5 @@
 # config.py
+import os
+
 TELEGRAM_BOT_TOKEN = '7445487515:AAFAyKbTZJ9GMu-0AQ1v8bNCT5AuDBrWS08'
-BACKEND_URL = 'http://167.71.49.59:8000/api'
+BACKEND_URL = 'http://web:8000/api'

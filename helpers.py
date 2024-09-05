@@ -14,18 +14,18 @@ TIME_FRAME_OPTIONS = {
 
 def calculate_date_range(option):
     today = datetime.now().date()
-    
-    if option == 'Today':
+
+    if option == 'Сегодня':
         return today, today
-    elif option == 'Last 3 Days':
+    elif option == 'За 3 дня':
         end_date = today
         start_date = today - timedelta(days=2)
         return start_date, end_date
-    elif option == 'This Week':
+    elif option == 'Неделя':
         end_date = today
         start_date = today - timedelta(days=today.weekday())
         return start_date, end_date
-    elif option == 'This Month':
+    elif option == 'Месяц':
         end_date = today
         start_date = today.replace(day=1)
         return start_date, end_date
