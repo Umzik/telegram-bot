@@ -24,9 +24,9 @@ async def start(update: Update, context: CallbackContext):
 
 def get_keyboard(role):
     try:
-        return [["Отметить приход", "Отметить уход"], ["Сгенерировать отчет"],["Поменять пароль"], ["Покинуть аккаунт"]] if role == 'admin' else [["Check In", "Check Out"], ["Leave Account"]]
+        return [["Отметить приход", "Отметить уход"], ["Сгенерировать отчет"],["Поменять пароль"], ["Покинуть аккаунт"]] if role == 'admin' else [["Отметить приход", "Отметить уход"], ["Покинуть аккаунт"]]
     except Exception as e:
-        return [["Leave Account"]]  # Fallback keyboard
+        return [["Покинуть аккаунт"]]  # Fallback keyboard
 
 
 async def send_reply(update: Update, text: str, context: CallbackContext, role=None):
