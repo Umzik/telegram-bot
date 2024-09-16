@@ -61,6 +61,8 @@ async def handle_user_selection(update: Update, context: CallbackContext):
     try:
         selected_user = update.message.text
         if selected_user == "Bekor qilish":
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
             await update.message.reply_text("Amaliyot bekor qilindi.", reply_markup=ReplyKeyboardMarkup(
                 get_keyboard(context.user_data.get('role')), resize_keyboard=True))
             return
@@ -85,7 +87,7 @@ async def handle_admin_action_selection(update: Update, context: CallbackContext
         action = update.message.text
         selected_user = context.user_data.get('selected_user')
         if not selected_user:
-            await update.message.reply_text("Foydalanuvchi tanlanmagan.")
+            handle_admin_checkin_checkout(Update, CallbackContext)
             return
 
         if action == "Ishchi kelishi":
@@ -95,10 +97,16 @@ async def handle_admin_action_selection(update: Update, context: CallbackContext
             # Send check-out request to backend
             await admin_checkin_checkout_backend(update, context, selected_user['id'], 'check_out')
         elif action == "Bekor qilish":
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
             await update.message.reply_text("Amaliyot bekor qilindi.", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
         else:
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
             await update.message.reply_text("Noto'g'ri amal tanlandi.")
     except Exception as e:
+        context.user_data.pop('selected_user', None)
+        context.user_data.pop('stage', None)
         await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
 
 
@@ -111,12 +119,18 @@ async def admin_checkin_checkout_backend(update: Update, context: CallbackContex
             json={'employee_id': user_id, 'action': action}
         )
         if response.status_code == 200:
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
             await update.message.reply_text(f"{action.capitalize()} muvaffaqiyatli bajarildi.")
         else:
             # Extract error message from backend response
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
             error_message = response.json().get('message', 'Xatolik yuz berdi.')
             await update.message.reply_text(f"{action.capitalize()}da xatolik: {error_message}")
     except Exception as e:
+        context.user_data.pop('selected_user', None)
+        context.user_data.pop('stage', None)
         await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
 
 
@@ -155,7 +169,7 @@ async def handle_change_password(update: Update, context: CallbackContext):
                 )
 
                 if response.status_code == 200:
-                    await update.message.reply_text("ВProlingiz muvaffaqiyattli o'zgartirildi.")
+                    await update.message.reply_text("Parolingiz muvaffaqiyattli o'zgartirildi.")
                 else:
                     await update.message.reply_text("Parol o'zgartirilmadi. Qayta takrorlab ko'rin.")
             except Exception as e:
