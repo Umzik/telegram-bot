@@ -24,7 +24,7 @@ async def start(update: Update, context: CallbackContext):
 
 def get_keyboard(role):
     try:
-        return [["Kelish", "Ketish"], ["Hisobot yaratish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]] if role == 'admin' else [["Kelish", "Ketish"], ["Akkauntdan chiqish"]]
+        return [["Kelish", "Ketish"], ["Hisobot yaratish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]] if role == 'admin' else [["Kelish", "Ketish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]]
     except Exception as e:
         return [["Akkauntdan chiqish"]]  # Fallback keyboard
 
