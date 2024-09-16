@@ -73,7 +73,7 @@ async def handle_user_selection(update: Update, context: CallbackContext):
                 break
 
         # Provide check-in and check-out options
-        reply_markup = ReplyKeyboardMarkup([["Kelish", "Ketish"], ["Bekor qilish"]], one_time_keyboard=True,
+        reply_markup = ReplyKeyboardMarkup([["Ishchi kelishi", "Ishchi ketishi"], ["Bekor qilish"]], one_time_keyboard=True,
                                            resize_keyboard=True)
         await update.message.reply_text(f"{selected_user} uchun amalni tanlang:", reply_markup=reply_markup)
         context.user_data['stage'] = 'admin_action_selection'
@@ -88,10 +88,10 @@ async def handle_admin_action_selection(update: Update, context: CallbackContext
             await update.message.reply_text("Foydalanuvchi tanlanmagan.")
             return
 
-        if action == "Kelish":
+        if action == "Ishchi kelishi":
             # Send check-in request to backend
             await admin_checkin_checkout_backend(update, context, selected_user['id'], 'check_in')
-        elif action == "Ketish":
+        elif action == "Ishchi ketishi":
             # Send check-out request to backend
             await admin_checkin_checkout_backend(update, context, selected_user['id'], 'check_out')
         elif action == "Bekor qilish":
