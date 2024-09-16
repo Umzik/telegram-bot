@@ -87,7 +87,9 @@ async def handle_admin_action_selection(update: Update, context: CallbackContext
         action = update.message.text
         selected_user = context.user_data.get('selected_user')
         if not selected_user:
-            handle_admin_checkin_checkout(Update, CallbackContext)
+            context.user_data.pop('selected_user', None)
+            context.user_data.pop('stage', None)
+            await update.message.reply_text("Foydalanuvchi tanlanmagan.", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
             return
 
         if action == "Ishchi kelishi":
