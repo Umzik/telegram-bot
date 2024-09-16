@@ -15,17 +15,17 @@ TIME_FRAME_OPTIONS = {
 def calculate_date_range(option):
     today = datetime.now().date()
 
-    if option == 'Сегодня':
+    if option == 'Bugun':
         return today, today
-    elif option == 'За 3 дня':
+    elif option == 'Uch kunlik':
         end_date = today
         start_date = today - timedelta(days=2)
         return start_date, end_date
-    elif option == 'Неделя':
+    elif option == 'Haftalik':
         end_date = today
         start_date = today - timedelta(days=today.weekday())
         return start_date, end_date
-    elif option == 'Месяц':
+    elif option == 'Oylik':
         end_date = today
         start_date = today.replace(day=1)
         return start_date, end_date

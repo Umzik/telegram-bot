@@ -15,18 +15,18 @@ async def start(update: Update, context: CallbackContext):
         context.user_data.clear()
         context.user_data['auth_stage'] = 'start'
         await update.message.reply_text(
-            "Добро пожаловать в бот! Пожалуйста, выберите вариант:",
-            reply_markup=ReplyKeyboardMarkup([["Авторизация"]], one_time_keyboard=True, resize_keyboard=True)
+            "Botga hush kelibsiz. Avtarizasiya uchun tugmani bosing:",
+            reply_markup=ReplyKeyboardMarkup([["Avtorizasiya"]], one_time_keyboard=True, resize_keyboard=True)
         )
     except Exception as e:
-        await update.message.reply_text(f"Ошибка: {str(e)}")
+        await update.message.reply_text(f"Xato: {str(e)}")
 
 
 def get_keyboard(role):
     try:
-        return [["Отметить приход", "Отметить уход"], ["Сгенерировать отчет"],["Поменять пароль"], ["Покинуть аккаунт"]] if role == 'admin' else [["Отметить приход", "Отметить уход"], ["Покинуть аккаунт"]]
+        return [["Kelish", "Ketish"], ["Hisobot yaratish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]] if role == 'admin' else [["Kelish", "Ketish"], ["Akkauntdan chiqish"]]
     except Exception as e:
-        return [["Покинуть аккаунт"]]  # Fallback keyboard
+        return [["Akkauntdan chiqish"]]  # Fallback keyboard
 
 
 async def send_reply(update: Update, text: str, context: CallbackContext, role=None):
@@ -35,7 +35,7 @@ async def send_reply(update: Update, text: str, context: CallbackContext, role=N
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
         await update.message.reply_text(text, reply_markup=reply_markup)
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка при отправке ответа: {str(e)}")
+        await update.message.reply_text(f"Javob jo'natishda xatolik yuz berdi: {str(e)}")
 
 
 async def handle_change_password(update: Update, context: CallbackContext):
@@ -47,14 +47,14 @@ async def handle_change_password(update: Update, context: CallbackContext):
         # Step 1: Ask for the current password
         if new_pass_stage == 'start_change_password':
             context.user_data['new_pass_stage'] = 'current_password'
-            await update.message.reply_text("Введите ваш текущий пароль:")
+            await update.message.reply_text("Hozirgi parol:")
 
         # Step 2: Store the current password and ask for the new password
         elif new_pass_stage == 'current_password':
             context.user_data['current_password'] = user_input
             await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=user_message_id)
             context.user_data['new_pass_stage'] = 'new_password'
-            await update.message.reply_text("Введите новый пароль:")
+            await update.message.reply_text("Yangi parol:")
 
         # Step 3: Confirm the password change and call backend to update
         elif new_pass_stage == 'new_password':
@@ -72,16 +72,16 @@ async def handle_change_password(update: Update, context: CallbackContext):
                 )
 
                 if response.status_code == 200:
-                    await update.message.reply_text("Ваш пароль был успешно изменен.")
+                    await update.message.reply_text("ВProlingiz muvaffaqiyattli o'zgartirildi.")
                 else:
-                    await update.message.reply_text("Не удалось сменить пароль. Попробуйте еще раз.")
+                    await update.message.reply_text("Parol o'zgartirilmadi. Qayta takrorlab ko'rin.")
             except Exception as e:
-                await update.message.reply_text(f"Произошла ошибка при смене пароля: {str(e)}")
+                await update.message.reply_text(f"Parol o'zgartirishta xatolik yuz berdi: {str(e)}")
 
             context.user_data['new_pass_stage'] = None
 
     except Exception as e:
-        await update.message.reply_text(f"An error occurred: {str(e)}")
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
 
 async def handle_auth(update: Update, context: CallbackContext):
     try:
@@ -89,15 +89,15 @@ async def handle_auth(update: Update, context: CallbackContext):
         user_input = update.message.text
         user_message_id = update.message.message_id
 
-        if user_input == "Авторизация" and auth_stage == 'start':
+        if user_input == "Avtorizasiya" and auth_stage == 'start':
             context.user_data['auth_stage'] = 'login'
-            await update.message.reply_text("Введите ваш логин:")
+            await update.message.reply_text("Loginingizni kiriting:")
 
         elif auth_stage == 'login':
             context.user_data['login'] = user_input
             await context.bot.delete_message(chat_id=update.effective_chat.id, message_id=user_message_id)
             context.user_data['auth_stage'] = 'password'
-            await update.message.reply_text("Введите ваш пароль:")
+            await update.message.reply_text("Parolingizni kiriting:")
 
         elif auth_stage == 'password':
             login = context.user_data.get('login')
@@ -108,19 +108,19 @@ async def handle_auth(update: Update, context: CallbackContext):
                 if get_user_token(login, password):
                     token_response, role_response, name, surname = get_user_token(login, password)
             except Exception as e:
-                await update.message.reply_text(f"Произошла ошибка при аутентификации: {str(e)}")
+                await update.message.reply_text(f"Autentifikasiya jarayonida xatolik: {str(e)}")
                 return
 
             if token_response:
                 context.user_data.update(
                     {'token': token_response, 'role': role_response, 'auth_stage': 'completed', 'status': 'base'})
-                await send_reply(update, "Вы авторизованы! Теперь вы можете использовать следующие команды:", context, role_response)
+                await send_reply(update, "Siz avtorizasiyadan o'tdingiz. Ushbu buyruqlar ishlatishingiz mumkin:", context, role_response)
             else:
-                await update.message.reply_text("Авторизация не удалась! Введите логин еще раз.")
+                await update.message.reply_text("Avtorizasiya yakunlanmadi! Qayta loginingizni kiriting.")
                 context.user_data['auth_stage'] = 'login'
 
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка: {str(e)}")
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
 
 
 async def handle_checkin_checkout(update: Update, context: CallbackContext, action: str):
@@ -128,17 +128,17 @@ async def handle_checkin_checkout(update: Update, context: CallbackContext, acti
         context.user_data['last_action'] = action
         await request_location(update)
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка во время {action}: {str(e)}")
+        await update.message.reply_text(f"Xatolik yuz berdi {action}: {str(e)}")
 
 
 async def handle_report(update: Update, context: CallbackContext):
     try:
         context.user_data['stage'] = 'report'
-        keyboard = [["Сегодня", "За 3 дня"], ["Неделя", "Месяц"], ["Другое"]]
+        keyboard = [["Bugun", "Uch kunlik"], ["Haftalik", "Oylik"], ["Boshqa"]]
         reply_markup = ReplyKeyboardMarkup(keyboard, one_time_keyboard=True, resize_keyboard=True)
-        await update.message.reply_text("Choose the time frame:", reply_markup=reply_markup)
+        await update.message.reply_text("Vaqt oraliqini tanlang:", reply_markup=reply_markup)
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка при формировании параметров отчета: {str(e)}")
+        await update.message.reply_text(f"Hisobot yaratishda xatolik: {str(e)}")
 
 async def start_change_password(update: Update, context: CallbackContext):
     context.user_data['new_pass_stage'] = 'start_change_password'
@@ -158,11 +158,11 @@ async def handle_message(update: Update, context: CallbackContext):
             return
 
         actions = {
-            "Отметить приход": lambda: handle_checkin_checkout(update, context, 'check_in'),
-            "Отметить уход": lambda: handle_checkin_checkout(update, context, 'check_out'),
-            "Сгенерировать отчет": lambda: handle_report(update, context),
-            "Поменять пароль": lambda: start_change_password(update, context),  # Trigger password change flow
-            "Покинуть аккаунт": lambda: update.message.reply_text("Вы вышли из системы. Чтобы начать снова, нажмите /start.") or context.user_data.clear(),
+            "Kelish": lambda: handle_checkin_checkout(update, context, 'check_in'),
+            "Ketish": lambda: handle_checkin_checkout(update, context, 'check_out'),
+            "Hisobot yaratish": lambda: handle_report(update, context),
+            "Parol o'zgartirish": lambda: start_change_password(update, context),  # Trigger password change flow
+            "Akkauntdan chiqish": lambda: update.message.reply_text("Siz sistemadan chiqdingiz. Qaytakirish uchu /start bosing.") or context.user_data.clear(),
         }
 
         if user_input in actions:
@@ -173,20 +173,20 @@ async def handle_message(update: Update, context: CallbackContext):
             await handle_change_password(update, context)
 
         # Handling predefined report timeframes
-        if stage == 'report' and user_input in ('Сегодня', 'За 3 дня', 'Неделя', 'Месяц'):
+        if stage == 'report' and user_input in ('Bugun', 'Uch kunlik', 'Haftalik', 'Oylik'):
             await non_custom_report(update, context, user_input, reply_markup)
             context.user_data['stage'] = None
 
         # Handling custom report date (start date)
-        elif stage == 'report' and user_input == 'Другое':
+        elif stage == 'report' and user_input == 'Boshqa':
             context.user_data['stage'] = 'report-custom'
-            await update.message.reply_text("Пожалуйста, введите дату начала:")
+            await update.message.reply_text("Iltimos, boshlanish sanani kiriting:")
 
         # Handling custom report date (end date)
         elif stage == 'report-custom':
             context.user_data['start_date'] = user_input
             context.user_data['stage'] = 'report-custom2'
-            await update.message.reply_text("Введите дату окончания:")
+            await update.message.reply_text("Iltimos, tugash sanani kiriting:")
 
         # Completing custom report generation
         elif stage == 'report-custom2':
@@ -196,7 +196,7 @@ async def handle_message(update: Update, context: CallbackContext):
 
     except Exception as e:
         reply_markup = ReplyKeyboardMarkup(get_keyboard(role), one_time_keyboard=True, resize_keyboard=True)
-        await update.message.reply_text(f"При обработке вашего запроса произошла ошибка: {str(e)}", reply_markup=reply_markup)
+        await update.message.reply_text(f"So‘rovingizni ko‘rib chiqishda xatolik yuz berdi: {str(e)}", reply_markup=reply_markup)
 
 
 async def handle_location(update: Update, context: CallbackContext):
@@ -210,8 +210,8 @@ async def handle_location(update: Update, context: CallbackContext):
         elif last_action == 'check_out':
             await checkout(update, context, reply_markup)
         else:
-            await update.message.reply_text("Пожалуйста, укажите, хотите ли вы сначала зарегистрироваться или выписаться.", reply_markup=reply_markup)
+            await update.message.reply_text("Iltimos, avval ro'yxatdan o'tish yoki chiqishni xohlaysizmi, ko'rsating.", reply_markup=reply_markup)
     except Exception as e:
         logging.log(e)
-        await update.message.reply_text(f"Произошла ошибка при обработке местоположения: {str(e)}", reply_markup=reply_markup)
+        await update.message.reply_text(f"Joylashuvni qayta ishlashda xatolik yuz berdi: {str(e)}", reply_markup=reply_markup)
 

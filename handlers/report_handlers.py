@@ -25,18 +25,18 @@ async def non_custom_report(update: Update, context: CallbackContext, user_input
                     document=response.content,
                     filename="Attendance_Report.xlsx"
                 )
-                await update.message.reply_text("Отчет успешно сформирован.", reply_markup=reply_markup)
+                await update.message.reply_text("Hisobot muvaffaqiyatli yaratildi.", reply_markup=reply_markup)
             else:
-                await update.message.reply_text(f"Не удалось создать отчет. Код статуса: {response.status_code}",
+                await update.message.reply_text(f"Hisobot yaratib bo‘lmadi. Status kodi: {response.status_code}",
                                                 reply_markup=reply_markup)
         else:
-            await update.message.reply_text("Неверный параметр временных рамок.", reply_markup=reply_markup)
+            await update.message.reply_text("Vaqt oralig‘i noto‘g‘ri.", reply_markup=reply_markup)
 
     except requests.RequestException as req_err:
-        await update.message.reply_text(f"Ошибка сети при формировании отчета:{str(req_err)}",
+        await update.message.reply_text(f"Hisobotni yaratishda tarmoq xatosi:{str(req_err)}",
                                         reply_markup=reply_markup)
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка при формировании отчета: {str(e)}",
+        await update.message.reply_text(f"Hisobotni yaratishda xatolik yuz berdi: {str(e)}",
                                         reply_markup=reply_markup)
 
 
@@ -44,8 +44,8 @@ async def handle_custom_dates(update: Update, context: CallbackContext, reply_ma
     token = context.user_data.get('token')
 
     if not token:
-        await update.message.reply_text("Сначала вам необходимо пройти аутентификацию. Пожалуйста, начните снова.",
-                                        reply_markup=ReplyKeyboardMarkup([["Авторизация"]], one_time_keyboard=True,
+        await update.message.reply_text("Avval siz autentifikatsiya qilishingiz kerak. Iltimos, qaytadan boshlang.",
+                                        reply_markup=ReplyKeyboardMarkup([["Avtorizasiya"]], one_time_keyboard=True,
                                                                          resize_keyboard=True))
         return
 
@@ -69,21 +69,21 @@ async def handle_custom_dates(update: Update, context: CallbackContext, reply_ma
                 document=response.content,
                 filename="Attendance_Report.xlsx"
             )
-            await update.message.reply_text("Отчет успешно сформирован.", reply_markup=reply_markup)
+            await update.message.reply_text("Hisobot muvaffaqiyatli yaratildi.", reply_markup=reply_markup)
         else:
-            await update.message.reply_text(f"Не удалось создать отчет. Код статуса:{response.status_code}",
+            await update.message.reply_text(f"Hisobot yaratib bo‘lmadi. Status kodi:{response.status_code}",
                                             reply_markup=reply_markup)
 
     except ValueError:
-        await update.message.reply_text("Неверный формат даты. Используйте формат ГГГГ-ММ-ДД.",
+        await update.message.reply_text("Sana formati yaroqsiz. YYYY-MM-DD formatidan foydalaning.",
                                         reply_markup=reply_markup)
 
     except requests.RequestException as req_err:
-        await update.message.reply_text(f"Ошибка сети при формировании отчета: {str(req_err)}",
+        await update.message.reply_text(f"Hisobotni yaratishda tarmoq xatosi: {str(req_err)}",
                                         reply_markup=reply_markup)
 
     except Exception as e:
-        await update.message.reply_text(f"Произошла ошибка при формировании отчета: {str(e)}",
+        await update.message.reply_text(f"Hisobotni yaratishda xatolik yuz berdi: {str(e)}",
                                         reply_markup=reply_markup)
 
     finally:
