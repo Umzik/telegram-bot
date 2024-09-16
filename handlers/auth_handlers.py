@@ -105,11 +105,11 @@ async def handle_admin_action_selection(update: Update, context: CallbackContext
         else:
             context.user_data.pop('selected_user', None)
             context.user_data.pop('stage', None)
-            await update.message.reply_text("Noto'g'ri amal tanlandi.")
+            await update.message.reply_text("Noto'g'ri amal tanlandi.", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
     except Exception as e:
         context.user_data.pop('selected_user', None)
         context.user_data.pop('stage', None)
-        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
 
 
 async def admin_checkin_checkout_backend(update: Update, context: CallbackContext, user_id, action):
@@ -123,17 +123,17 @@ async def admin_checkin_checkout_backend(update: Update, context: CallbackContex
         if response.status_code == 200:
             context.user_data.pop('selected_user', None)
             context.user_data.pop('stage', None)
-            await update.message.reply_text(f"{action.capitalize()} muvaffaqiyatli bajarildi.")
+            await update.message.reply_text(f"{action.capitalize()} muvaffaqiyatli bajarildi.", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
         else:
             # Extract error message from backend response
             context.user_data.pop('selected_user', None)
             context.user_data.pop('stage', None)
             error_message = response.json().get('message', 'Xatolik yuz berdi.')
-            await update.message.reply_text(f"{action.capitalize()}da xatolik: {error_message}")
+            await update.message.reply_text(f"{action.capitalize()}da xatolik: {error_message}", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
     except Exception as e:
         context.user_data.pop('selected_user', None)
         context.user_data.pop('stage', None)
-        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
 
 
 
