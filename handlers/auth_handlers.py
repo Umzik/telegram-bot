@@ -45,7 +45,7 @@ async def handle_admin_checkin_checkout(update: Update, context: CallbackContext
         if response.status_code == 200:
             users = response.json()
             # Create a list of users to display as buttons
-            user_buttons = [[user['first_name'] + " " + user['last_name']] for user in users]
+            user_buttons = [[user['first_name']] for user in users]
             user_buttons.append(["Bekor qilish"])
             reply_markup = ReplyKeyboardMarkup(user_buttons, one_time_keyboard=True, resize_keyboard=True)
             await update.message.reply_text("Biror foydalanuvchini tanlang:", reply_markup=reply_markup)
@@ -70,7 +70,7 @@ async def handle_user_selection(update: Update, context: CallbackContext):
         # Find the selected user from the list
         users = context.user_data.get('users', [])
         for user in users:
-            if f"{user['first_name']} {user['last_name']}" == selected_user:
+            if f"{user['first_name']}" == selected_user:
                 context.user_data['selected_user'] = user
                 break
 
