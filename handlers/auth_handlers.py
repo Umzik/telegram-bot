@@ -24,7 +24,7 @@ async def start(update: Update, context: CallbackContext):
 
 def get_keyboard(role):
     try:
-        return [["Kelish", "Ketish"], ["Hisobot yaratish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]] if role == 'admin' else [["Kelish", "Ketish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]]
+        return [["Kelish", "Ketish"], ["Admin Panel"], ["Hisobot yaratish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]] if role == 'admin' else [["Kelish", "Ketish"],["Parol o'zgartirish"], ["Akkauntdan chiqish"]]
     except Exception as e:
         return [["Akkauntdan chiqish"]]  # Fallback keyboard
 
@@ -36,6 +36,89 @@ async def send_reply(update: Update, text: str, context: CallbackContext, role=N
         await update.message.reply_text(text, reply_markup=reply_markup)
     except Exception as e:
         await update.message.reply_text(f"Javob jo'natishda xatolik yuz berdi: {str(e)}")
+
+async def handle_admin_checkin_checkout(update: Update, context: CallbackContext):
+    try:
+        # Fetch users from the backend
+        token = context.user_data.get('token')
+        response = requests.get(f"{BACKEND_URL}/users/", headers={'Authorization': f'Bearer {token}'})
+        if response.status_code == 200:
+            users = response.json()
+            # Create a list of users to display as buttons
+            user_buttons = [[user['first_name'] + " " + user['last_name']] for user in users]
+            user_buttons.append(["Bekor qilish"])
+            reply_markup = ReplyKeyboardMarkup(user_buttons, one_time_keyboard=True, resize_keyboard=True)
+            await update.message.reply_text("Biror foydalanuvchini tanlang:", reply_markup=reply_markup)
+            context.user_data['stage'] = 'admin_user_selection'
+            context.user_data['users'] = users
+        else:
+            await update.message.reply_text("Foydalanuvchilarni olishda xatolik yuz berdi.")
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+
+
+async def handle_user_selection(update: Update, context: CallbackContext):
+    try:
+        selected_user = update.message.text
+        if selected_user == "Bekor qilish":
+            await update.message.reply_text("Amaliyot bekor qilindi.", reply_markup=ReplyKeyboardMarkup(
+                get_keyboard(context.user_data.get('role')), resize_keyboard=True))
+            return
+
+        # Find the selected user from the list
+        users = context.user_data.get('users', [])
+        for user in users:
+            if f"{user['first_name']} {user['last_name']}" == selected_user:
+                context.user_data['selected_user'] = user
+                break
+
+        # Provide check-in and check-out options
+        reply_markup = ReplyKeyboardMarkup([["Kelish", "Ketish"], ["Bekor qilish"]], one_time_keyboard=True,
+                                           resize_keyboard=True)
+        await update.message.reply_text(f"{selected_user} uchun amalni tanlang:", reply_markup=reply_markup)
+        context.user_data['stage'] = 'admin_action_selection'
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+
+async def handle_admin_action_selection(update: Update, context: CallbackContext):
+    try:
+        action = update.message.text
+        selected_user = context.user_data.get('selected_user')
+        if not selected_user:
+            await update.message.reply_text("Foydalanuvchi tanlanmagan.")
+            return
+
+        if action == "Kelish":
+            # Send check-in request to backend
+            await admin_checkin_checkout_backend(update, context, selected_user['id'], 'check_in')
+        elif action == "Ketish":
+            # Send check-out request to backend
+            await admin_checkin_checkout_backend(update, context, selected_user['id'], 'check_out')
+        elif action == "Bekor qilish":
+            await update.message.reply_text("Amaliyot bekor qilindi.", reply_markup=ReplyKeyboardMarkup(get_keyboard(context.user_data.get('role')), resize_keyboard=True))
+        else:
+            await update.message.reply_text("Noto'g'ri amal tanlandi.")
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+
+
+async def admin_checkin_checkout_backend(update: Update, context: CallbackContext, user_id, action):
+    try:
+        token = context.user_data.get('token')
+        response = requests.post(
+            f"{BACKEND_URL}/admin/check/",
+            headers={'Authorization': f'Bearer {token}'},
+            json={'employee_id': user_id, 'action': action}
+        )
+        if response.status_code == 200:
+            await update.message.reply_text(f"{action.capitalize()} muvaffaqiyatli bajarildi.")
+        else:
+            # Extract error message from backend response
+            error_message = response.json().get('message', 'Xatolik yuz berdi.')
+            await update.message.reply_text(f"{action.capitalize()}da xatolik: {error_message}")
+    except Exception as e:
+        await update.message.reply_text(f"Xatolik yuz berdi: {str(e)}")
+
 
 
 async def handle_change_password(update: Update, context: CallbackContext):
@@ -161,13 +244,19 @@ async def handle_message(update: Update, context: CallbackContext):
             "Kelish": lambda: handle_checkin_checkout(update, context, 'check_in'),
             "Ketish": lambda: handle_checkin_checkout(update, context, 'check_out'),
             "Hisobot yaratish": lambda: handle_report(update, context),
-            "Parol o'zgartirish": lambda: start_change_password(update, context),  # Trigger password change flow
+            "Parol o'zgartirish": lambda: start_change_password(update, context),
+            "Admin Panel": lambda: handle_admin_checkin_checkout(update, context),
             "Akkauntdan chiqish": lambda: update.message.reply_text("Siz sistemadan chiqdingiz. Qaytakirish uchu /start bosing.") or context.user_data.clear(),
         }
 
         if user_input in actions:
             await actions[user_input]()
             return
+
+        if stage == 'admin_user_selection':
+            await handle_user_selection(update, context)
+        elif stage == 'admin_action_selection':
+            await handle_admin_action_selection(update, context)
 
         if new_pass_stage:
             await handle_change_password(update, context)
